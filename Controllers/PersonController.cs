@@ -1,11 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using WebForm.DTOs;
 using WebForm.IRepository;
 using WebForm.Models;
 
 namespace WebForm.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[Route("api/[controller]")]
 public class PersonController : ControllerBase
 {
     private readonly IPersonRepository _personRepository;
@@ -15,9 +16,47 @@ public class PersonController : ControllerBase
     }
     
     [HttpGet]
-    public async Task<ActionResult<List<Person>>> Get()
+    public async Task<ActionResult<List<Person>>> Select()
     {
         var people = await _personRepository.SelectPeople();
         return Ok(people);
+    }
+    
+    [HttpGet("{id}")]
+    public async Task<ActionResult<Person>> SelectById(int id)
+    {
+        var person = await _personRepository.SelectPersonId(id);
+        if (person is not null) return Ok(person);
+        
+        return NotFound();
+    }
+    [HttpPost]
+    public async Task<ActionResult<Person>> Insert([FromBody] PersonDto personDto)
+    {
+        var newPerson = await _personRepository.InsertPerson(personDto);
+        if (newPerson == null)
+        {
+            return BadRequest(new { error = "Email already exists in the database, please choose another" });
+        }
+
+        return Ok(newPerson);
+    }
+    
+    [HttpPut("{id}")]
+    public async Task<ActionResult<Person>> Update([FromRoute] int id, [FromBody] PersonUpdateDto personUpdateDto)
+    {
+        var updatedPerson = await _personRepository.UpdatePerson(id, personUpdateDto);
+        if (updatedPerson is not null) return Ok(updatedPerson);
+        
+        return NotFound();
+    }
+    
+    [HttpDelete("{id}")]
+    public async Task<ActionResult<Person>> Delete([FromRoute] int id)
+    {
+        var deletePerson = await _personRepository.DeletePerson(id);
+        if (deletePerson is not null) return Ok(deletePerson);
+        
+        return NotFound();
     }
 }
