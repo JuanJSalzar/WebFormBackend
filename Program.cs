@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using WebForm.Context;
+using WebForm.IRepository;
+using WebForm.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +16,8 @@ builder.Services.AddDbContext<WebFormContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")); 
 });
+
+builder.Services.AddScoped<IPersonRepository, PersonRepository>();
 
 var app = builder.Build();
 
