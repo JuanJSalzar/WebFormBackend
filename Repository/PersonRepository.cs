@@ -68,7 +68,6 @@ public class PersonRepository : IPersonRepository
                 new SqlParameter("@IdentificationType", personUpdateDto.IdentificationType)
             };
 
-            // Execute the stored procedure and handle the result
             var updatedPerson = _dbcontext.People
                 .FromSqlRaw("EXEC dbo.update_person @Id, @FirstName, @LastName, @Email, @IdentificationType", parameters)
                 .AsEnumerable()
@@ -76,7 +75,7 @@ public class PersonRepository : IPersonRepository
 
             return updatedPerson;
         }
-        catch (SqlException ex) when (ex.Number == 51002) // Error number for email already exists
+        catch (SqlException ex) when (ex.Number == 51002) 
         {
             throw new InvalidOperationException("Email already exists", ex);
         }
