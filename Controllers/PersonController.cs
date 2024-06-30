@@ -45,10 +45,27 @@ public class PersonController : ControllerBase
     [HttpPut("{id}")]
     public async Task<ActionResult<Person>> Update([FromRoute] int id, [FromBody] PersonUpdateDto personUpdateDto)
     {
-        var updatedPerson = await _personRepository.UpdatePerson(id, personUpdateDto);
-        if (updatedPerson is not null) return Ok(updatedPerson);
-        
-        return NotFound();
+        try
+        {
+            var updatedPerson = await _personRepository.UpdatePerson(id, personUpdateDto);
+
+            if (updatedPerson != null)
+            {
+                return Ok(updatedPerson);
+            }
+            else
+            {
+                return NotFound();
+            }
+        }
+        catch (InvalidOperationException ex) when (ex.Message == "Email already exists")
+        {
+            return BadRequest("Email already exists in the database.");
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, "Internal server error.");
+        }
     }
     
     [HttpDelete("{id}")]

@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using WebForm.Context;
 using WebForm.DTOs;
 using WebForm.IRepository;
@@ -20,8 +21,11 @@ public class PersonRepository : IPersonRepository
 
     public async Task<Person> SelectPersonId(int id)
     {
-        return await _dbcontext.People.FindAsync(id);
+        var parameters = new SqlParameter("@Id", id);
+        var query = await _dbcontext.People.FromSqlRaw("EXEC dbo.select_person_by_id @Id", parameters).ToListAsync();
+        return query.FirstOrDefault();
     }
+
 
     public async Task<Person> InsertPerson(PersonDto person)
     {
@@ -29,36 +33,55 @@ public class PersonRepository : IPersonRepository
         {
             return null;
         }
-        var createPerson = new Person
+
+        var parameters = new[]
         {
-            FirstName = person.FirstName,
-            LastName = person.LastName,
-            IdentificationNumber = person.IdentificationNumber,
-            Email = person.Email,
-            IdentificationType = person.IdentificationType,
-            CreationDate = DateTime.Now
+            new SqlParameter("@FirstName", person.FirstName),
+            new SqlParameter("@LastName", person.LastName),
+            new SqlParameter("@IdentificationNumber", person.IdentificationNumber),
+            new SqlParameter("@Email", person.Email),
+            new SqlParameter("@IdentificationType", person.IdentificationType)
         };
 
-        await _dbcontext.People.AddAsync(createPerson);
-        await _dbcontext.SaveChangesAsync();
-        return createPerson;
+        var insertedPerson = _dbcontext.People
+            .FromSqlRaw("EXEC dbo.insert_person @FirstName, @LastName, @IdentificationNumber, @Email, @IdentificationType", parameters)
+            .AsEnumerable()
+            .FirstOrDefault();
+
+        return insertedPerson;
     }
 
     public async Task<Person> UpdatePerson(int id, PersonUpdateDto personUpdateDto)
     {
-        var existingPerson = await _dbcontext.People.FindAsync(id);
-        if (existingPerson is not null)
+        try
         {
-            existingPerson.FirstName = personUpdateDto.FirstName;
-            existingPerson.LastName = personUpdateDto.LastName;
-            existingPerson.Email = personUpdateDto.Email;
-            existingPerson.IdentificationType = personUpdateDto.IdentificationType;
-            await _dbcontext.SaveChangesAsync();
-            return existingPerson;
-        }
+            var existingPerson = await _dbcontext.People.FindAsync(id);
 
-        return null;
+            if (existingPerson == null) return null;
+
+            var parameters = new[]
+            {
+                new SqlParameter("@Id", id),
+                new SqlParameter("@FirstName", personUpdateDto.FirstName),
+                new SqlParameter("@LastName", personUpdateDto.LastName),
+                new SqlParameter("@Email", personUpdateDto.Email),
+                new SqlParameter("@IdentificationType", personUpdateDto.IdentificationType)
+            };
+
+            // Execute the stored procedure and handle the result
+            var updatedPerson = _dbcontext.People
+                .FromSqlRaw("EXEC dbo.update_person @Id, @FirstName, @LastName, @Email, @IdentificationType", parameters)
+                .AsEnumerable()
+                .FirstOrDefault();
+
+            return updatedPerson;
+        }
+        catch (SqlException ex) when (ex.Number == 51002) // Error number for email already exists
+        {
+            throw new InvalidOperationException("Email already exists", ex);
+        }
     }
+
 
     public async Task<Person> DeletePerson(int id)
     {
