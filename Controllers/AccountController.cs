@@ -75,20 +75,6 @@ public class AccountController : ControllerBase
             return StatusCode(500, e.Message);
         }
     }
-    // [HttpPost]
-    // [Route("api/login")]
-    // public async Task<IActionResult> Login(LoginDto loginDto)
-    // {
-    //     var user = await _dbcontext.Users.FirstOrDefaultAsync(u => u.Username == loginDto.Username && u.Password == _utils.EncryptSHA256(loginDto.Password));
-    //     if (user == null)
-    //     {
-    //         return BadRequest("Invalid credentials");
-    //     }
-    //     else
-    //     {
-    //         return Ok(new { token = _utils.JwtGenerateToken(user) });
-    //     }
-    // }
     [HttpPost]
     [Route("api/login")]
     public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
