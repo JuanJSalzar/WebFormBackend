@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using WebForm.DTOs;
 using WebForm.IRepository;
 using WebForm.Models;
@@ -6,6 +7,7 @@ using WebForm.Models;
 namespace WebForm.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/[controller]")]
 public class PersonController : ControllerBase
 {
@@ -29,17 +31,6 @@ public class PersonController : ControllerBase
         if (person is not null) return Ok(person);
         
         return NotFound();
-    }
-    [HttpPost]
-    public async Task<ActionResult<Person>> Insert([FromBody] PersonDto personDto)
-    {
-        var newPerson = await _personRepository.InsertPerson(personDto);
-        if (newPerson == null)
-        {
-            return BadRequest(new { error = "Email already exists in the database, please choose another" });
-        }
-
-        return Ok(newPerson);
     }
     
     [HttpPut("{id}")]
