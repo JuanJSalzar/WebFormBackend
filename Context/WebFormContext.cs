@@ -32,7 +32,7 @@ public class WebFormContext : DbContext
         {
             user.HasKey(u => u.Id);
             user.Property(u => u.Username).IsRequired().HasMaxLength(50);
-            user.Property(u => u.Password).IsRequired().HasMaxLength(50);
+            user.Property(u => u.Password).IsRequired().HasMaxLength(100);
             user.Property(u => u.CreationDate).IsRequired().HasDefaultValueSql("GETDATE()");
         });
     }

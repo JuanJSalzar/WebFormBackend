@@ -81,7 +81,6 @@ public class PersonRepository : IPersonRepository
         }
     }
 
-
     public async Task<Person> DeletePerson(int id)
     {
         var person = await _dbcontext.People.FindAsync(id);

@@ -1,9 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using Microsoft.EntityFrameworkCore;
 
 namespace WebForm.DTOs;
 
-public class PersonDto
+public class RegisterDto
 {
     [Required (ErrorMessage = "The field {0} is required.")]
     [MaxLength(50, ErrorMessage = "The field {0} must have a maximum of 50 characters.")] 
@@ -32,4 +31,14 @@ public class PersonDto
     [MinLength(2, ErrorMessage = "The field {0} must have a minimum of 2 characters.")] 
     [RegularExpression("^[A-Za-z]+$", ErrorMessage = "The field {0} must have only letters.")]
     public string IdentificationType { get; set; }
+    
+    [Required (ErrorMessage = "The field {0} is required.")]
+    [MaxLength(50, ErrorMessage = "The field {0} must have a maximum of 50 characters.")] 
+    [MinLength(2, ErrorMessage = "The field {0} must have a minimum of 3 characters.")] 
+    public string Username { get; set; }
+    
+    [Required (ErrorMessage = "The field {0} is required.")]
+    [MaxLength(50, ErrorMessage = "The field {0} must have a maximum of 50 characters.")] 
+    [MinLength(8, ErrorMessage = "The field {0} must have a minimum of 8 characters.")] 
+    public string Password { get; set; }
 }
